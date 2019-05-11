@@ -12,3 +12,4 @@ where users' personal data is protected. We show developers and researchers how 
 ### Current list of demos
 
 1. [Cloud Functions Demo using Microsoft SEAL for .NET](CloudFunctionsDemo/README.md)
+2. [AsureRun Demo using Microsoft SEAL for Android](AsureRun/README.md)
