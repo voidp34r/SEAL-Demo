@@ -1,0 +1,29 @@
+﻿# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio files and directories
+.vs/
+#.vcxproj.filters
+*.user
+packages/
+.config/
+
+# Linux build objects
+*.o
+
+# MSTest test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# Specific SEAL CMake output files
+external/seal/src/cmake/SEALConfig.cmake
+external/seal/src/cmake/SEALConfigVersion.cmake
+external/seal/src/cmake/SEALTargets.cmake
+external/seal/src/seal/util/config.h

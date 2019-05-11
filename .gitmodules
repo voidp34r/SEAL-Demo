@@ -1,0 +1,4 @@
+[submodule "AsureRun/external/seal"]
+	path = AsureRun/external/seal
+	url = https://github.com/Microsoft/seal
+	branch = master

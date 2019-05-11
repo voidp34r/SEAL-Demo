@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.HomeActivity">
+
+    <include layout="@layout/content_home_fragment" />
+
+
+    <TextView
+        android:id="@+id/textMessage"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:textColor="@android:color/white"
+        android:gravity="center_vertical"
+        android:background="@color/notificationLabel"
+        android:text="   Syncing Data ..." />
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="50dp"
+        android:padding="10dp">
+
+
+        <ImageButton
+            android:id="@+id/start"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            android:background="@drawable/round_button"
+            android:drawablePadding="20dp"
+            android:elevation="10dp"
+            android:gravity="center"
+            android:src="@drawable/ic_play" />
+
+    </RelativeLayout>
+
+</android.support.design.widget.CoordinatorLayout>

@@ -1,0 +1,105 @@
+apply plugin: 'com.android.application'
+android {
+    compileSdkVersion 28
+
+    def gitCommitCount = "git rev-list HEAD --count".execute().text.trim().toInteger()
+
+    def cdBuildVersion = project.hasProperty('cdBuildVersion') ? project.getProperties().get('cdBuildVersion') : ''
+
+    def service_url_dev = project.hasProperty('service_url_dev') ? project.property('service_url_dev') : ""
+    def service_url = project.hasProperty('service_url') ? project.property('service_url') : ""
+    def maps_key = project.hasProperty('maps_key') ? project.property('maps_key') : ""
+    def google_client_id = project.hasProperty('google_client_id') ? project.property('google_client_id') : ""
+    def microsoft_client_id = project.hasProperty('microsoft_client_id') ? project.property('microsoft_client_id') : ""
+    def facebook_app_id = project.hasProperty('facebook_app_id') ? project.property('facebook_app_id') : ""
+    def app_center_secret_key = project.hasProperty('app_center_secret_key') ? project.property('app_center_secret_key') : ""
+
+    defaultConfig {
+        applicationId "com.microsoft.asurerun"
+        minSdkVersion 22
+        targetSdkVersion 28
+        versionCode gitCommitCount
+        versionName "1.0" + "-" + cdBuildVersion
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++17 -frtti -fexceptions"
+            }
+        }
+        ndk {
+            abiFilters 'arm64-v8a'
+            abiFilters 'x86_64'
+        }
+        buildConfigField 'String', 'SERVICE_URL', "\"$service_url_dev\""
+        resValue "string", "service_url", "\"$service_url_dev\""
+        resValue "string", "MapsKey", "\"$maps_key\""
+        resValue "string", "googleClientId", "\"$google_client_id\""
+        resValue "string", "microsoftClientId", "\"$microsoft_client_id\""
+        resValue "string", "microsoftSchema", "\"msal$microsoft_client_id\""
+        resValue "string", "facebook_app_id", "\"$facebook_app_id\""
+        resValue "string", "fb_login_protocol_scheme", "\"fb$facebook_app_id\""
+        resValue "string", "app_center_secret_key", "\"$app_center_secret_key\""
+        buildConfigField "java.util.Date", "BUILD_TIME", "new java.util.Date(" + System.currentTimeMillis() + "L)"
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField 'String', 'SERVICE_URL', "\"$service_url\""
+            resValue "string", "service_url", "\"$service_url\""
+            buildConfigField "java.util.Date", "BUILD_TIME", "new java.util.Date(" + System.currentTimeMillis() + "L)"
+        }
+        applicationVariants.all { variant ->
+            variant.outputs.all {
+                outputFileName = "AsureRun-" + versionName + "." + versionCode + ".apk"
+            }
+        }
+    }
+    repositories {
+        flatDir {
+            dirs 'aars'
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path 'CMakeLists.txt'
+        }
+    }
+    sourceSets {
+        main {
+            jniLibs.srcDirs 'lib'
+        }
+    }
+    lintOptions {
+        abortOnError false 
+    }
+}
+
+dependencies {
+    def appCenterSdkVersion = '1.8.0'
+    implementation "com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}"
+    implementation "com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}"
+    implementation "com.microsoft.appcenter:appcenter-distribute:${appCenterSdkVersion}"
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.google.code.gson:gson:2.3'
+    implementation 'com.google.guava:guava:18.0'
+    implementation 'com.squareup.okhttp:okhttp:2.5.0'
+    implementation 'com.microsoft.azure:azure-mobile-android:3.4.0@aar'
+    implementation 'com.microsoft.azure:azure-notifications-handler:1.0.1@jar'
+    implementation 'com.android.support:customtabs:28.0.0'
+    implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'com.microsoft.azure.android:azure-storage-android:2.0.0@aar'
+    implementation 'com.android.support:design:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    implementation 'com.nineoldandroids:library:2.4.+'
+    implementation 'com.google.android.gms:play-services-location:15+'
+    implementation 'com.google.android.gms:play-services-maps:15.0.1'
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
+    implementation 'com.android.volley:volley:1.1.1'
+    implementation 'com.google.android.gms:play-services-auth:15.0.1'
+    implementation 'com.facebook.android:facebook-login:[4,5)'
+    implementation 'com.microsoft.identity.client:msal:0.2.+'
+    implementation 'com.squareup.picasso:picasso:2.71828'
+}

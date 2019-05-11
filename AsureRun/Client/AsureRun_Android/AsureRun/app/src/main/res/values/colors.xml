@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- General colors -->
+    <color name="colorPrimary">#212121</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#848484</color>
+    <color name="white">#ffffff</color>
+    <color name="blue">#d70078d4</color>
+    <color name="MSOrange">#ff8c00</color>
+    <!-- Buttons colors-->
+    <color name="buttonNormalColor">#FF8C00</color>
+    <color name="buttonDisableColor">#848484</color>
+    <color name="buttonTextColor">#ffffff</color>
+    <color name="button2NormalColor">#424242</color>
+    <color name="button2PressedColor">#848484</color>
+    <color name="button2TextColor">#FF8C00</color>
+    <color name="fabMSSignInColor">#0078D4</color>
+    <!--Layout colors-->
+    <color name="activityBackgroundColor">#303030</color>
+    <color name="toolbarColor">#212121</color>
+    <color name="dialogBackgroundColor">#424242</color>
+    <color name="notificationLabel">#d70078d4</color>
+    <color name="cardBackgroundColor">#424242</color>
+    <color name="cardInactiveColor">#2E2E2E</color>
+    <color name="classification_high_intensity">#e3531f</color>
+    <color name="classification_medium_intensity">#ff8c02</color>
+    <color name="classification_low_intensity">#ffb903</color>
+</resources>

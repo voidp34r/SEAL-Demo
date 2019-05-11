@@ -1,0 +1,141 @@
+<resources>
+
+    <string name="app_name">AsureRun</string>
+    <string name="start_button_text">Start</string>
+    <string name="stop_button_text">Stop</string>
+    <string name="pause_button_text">Pause</string>
+    <string name="service_title">Track your runs</string>
+    <string name="menu_refresh">Refresh</string>
+
+    <!-- Strings declaration for Run Activity-->
+    <string name="run_text">Run</string>
+    <string name="run_activity_distance_miles">Miles</string>
+    <string name="run_activity_distance_km">Km</string>
+    <string name="run_activity_warning_title">Warning</string>
+    <string name="run_activity_positive_battery_save_mode_text">Go to settings</string>
+    <string name="run_activity_keys_warning">Run has been stopped, however please wait for encryption keys setup to be completed</string>
+    <string name="run_activity_connection_warning">Run has been stopped, but it may not be correctly loaded on the server</string>
+    <string name="run_activity_internet_connection_warning">No Internet connection</string>
+    <string name="run_activity_warning_gps_message">The GPS signal is not accurate. Try moving to a different location for more precise tracking.</string>
+    <string name="run_activity_warning_battery_save_mode_message">Battery save mode is on. The app will not work properly in the background. Disable this mode to continue. </string>
+    <!-- Strings declaration for Settings Fragment-->
+    <string name="run_settings_distance_miles">Miles</string>
+    <string name="run_settings_distance_km">Km</string>
+    <string name="run_settings_distance_unit_foot">ft</string>
+    <string name="run_settings_distance_unit_meter">m</string>
+
+    <!-- Strings declaration for SetKeys Fragment-->
+    <string name="set_keys_header_text">We are setting up your public and private keys to keep your data safe. The keys can be up to 300MB and only public keys need to be moved to the cloud*. The entire process can take 5-6 minutes.</string>
+    <string name="set_keys_button_text">Process in the background</string>
+    <string name="set_keys_time_end">a few seconds remaining...</string>
+    <string name="set_keys_time_text"> min remaining...</string>
+    <string name="set_keys_total_time">6 min remaining...</string>
+    <string name="set_keys_footer_text">*Private keys are never moved to the cloud and encrypted data can be only decrypted by the client who holds both the private and public keys.</string>
+
+    <!-- Strings declaration for AdvancedSettings Fragment-->
+    <string name="advanced_settings_title">Resetting the Keys</string>
+    <string name="advanced_settings_message">Resetting the keys can delete some of your old data. Only the new and last used keys and associated data is saved.</string>
+    <string name="advanced_settings_question">Do you still want to proceed?</string>
+    <string name="advanced_settings_button">Resetting the keys</string>
+
+    <!-- Strings declaration for DeleteDataSettings Fragment-->
+    <string name="delete_settings_title">Delete all my data</string>
+    <string name="delete_settings_message">All previous data and summary statistics will be lost!</string>
+    <string name="delete_settings_question">Do you still want to proceed?</string>
+    <string name="delete_settings_button">Delete all my data</string>
+
+    <!-- Strings declaration for Logout Fragment-->
+    <string name="logout_title">Signing out</string>
+    <string name="logout_message">Signing out will delete all user data, including previous run data and summary statistics!</string>
+    <string name="logout_question">Do you still want to proceed?</string>
+    <string name="logout_button">Logout</string>
+
+    <!-- Strings declaration for RunHistory Fragment-->
+    <string name="run_history_unit_label_miles">Total miles</string>
+    <string name="run_history_unit_label_km">Total km</string>
+    <string name="run_history_sync_text">Syncing data…</string>
+    <string name="run_history_decrypt_text">Decrypting data…</string>
+
+    <string name="set_keys_error_title">Error</string>
+    <string name="set_keys_error_message">Error creating keys</string>
+
+    <string name="delete_run">Delete</string>
+
+    <!-- Strings declaration for SignIn screen-->
+    <string name="action_settings">Settings</string>
+    <string name="signInSocialText">Sign in with social media account</string>
+    <string name="beta_version">This is a beta version of the app, which is undergoing final testing before its official release</string>
+
+    <!-- RunSummary strings declaration-->
+    <string name="pace_set_name">Pace</string>
+    <string name="elevation_gain_set_name">Elevation Gain</string>
+    <string name="run_summary_distance_unit_miles">mi</string>
+    <string name="run_summary_distance_unit_km">km</string>
+
+    <!-- Strings declaration for nav-->
+    <string name="title_activity_sign_in">Sign in</string>
+    <string name="title_activity_summary">Run Summary</string>
+    <string name="title_fragment_home">Track your run</string>
+    <string name="title_fragment_history_list">History</string>
+    <string name="title_fragment_history_detail">History</string>
+    <string name="title_fragment_gen_key">Setting up the encryption keys...</string>
+    <string name="title_fragment_run_setting">Run Settings</string>
+    <string name="title_fragment_settings">Settings</string>
+    <string name="title_fragment_logout">Logout</string>
+    <string name="title_fragment_advanced_setting">Advanced settings</string>
+    <string name="title_fragment_delete_setting">Delete all my data</string>
+    <string name="title_fragment_privacy">Privacy</string>
+    <string name="title_fragment_license">License</string>
+    <string name="title_fragment_predictions">Predictions</string>
+    <string name="title_fragment_about_us_page">About Us</string>
+    <string name="title_fragment_debug_page">Debug</string>
+    <string name="title_fragment_learn_more_page">Learn More</string>
+    <string name="title_fragment_contact_us_page">Contact Us</string>
+
+
+    <!--Strings declaration for classification text-->
+    <string name="classification_high">High intensity</string>
+    <string name="classification_medium">Medium intensity</string>
+    <string name="classification_low">Low intensity</string>
+
+    <!--Strings declaration for Predictions Fragment-->
+    <string name="predictions_fragment_header_text">Here is a predicted* breakdown of your workouts</string>
+    <string name="predictions_fragment_footer_text">*We classify your workout as High, Medium or Low intensity by doing Machine Learning inferencing on encrypted data. The model never gets to see your unencrypted information!  </string>
+
+
+    <!-- Utils strings declaration-->
+    <string name="morning_string">Morning</string>
+    <string name="afternoon_string">Afternoon</string>
+    <string name="evening_string">Evening</string>
+    <string name="night_string">Night</string>
+
+    <!--Strings declaration for Debug Fragment-->
+    <string name="debug_fragment_header_text_left">Go &lt;a href= </string>
+    <string name="debug_fragment_header_text_right">&lt;/a&gt; for debug</string>
+
+
+    <!--Strings declaration for LearnMore Fragment-->
+    <string name="learn_more_fragment_header_text">This application has been developed by Microsoft Research group.
+        It uses Homomorphic Encryption to encrypt user data on client.
+        Subsequent calculations and done on encrypted data. The server never gets access to plaintext information, giving users full privacy &amp; control over their personal data.
+    </string>
+    <string name="learn_more_fragment_header_question">Want to learn more about this technology?</string>
+    <string name="learn_more_fragment_link_left">Go &lt;a href= </string>
+    <string name="learn_more_fragment_link_right">&gt;here&lt;/a&gt;</string>
+
+    <!--Strings declaration for ContactUs Fragment-->
+    <string name="contact_us_fragment_header_question">Got feedback or questions?</string>
+    <string name="contact_us_fragment_send_email">Send us an email at</string>
+    <string name="contact_us_fragment_email_address">AsureRun@microsoft.com</string>
+    <!-- Error message-->
+    <string name="network_error_title">No internet connection</string>
+    <string name="network_error_message">To continue, turn on device mobile data or Wi-Fi.</string>
+    <string name="location_error_title">Location is disabled</string>
+    <string name="location_error_message">To continue, turn on device location.</string>
+    <string name="retry_button_error">Retry</string>
+    <string name="exit_button_error">Exit</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_example">Example action</string>
+
+</resources>
