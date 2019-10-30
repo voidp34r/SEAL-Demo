@@ -37,14 +37,13 @@ namespace SEALAzureFuncClient
         }
 
         /// <summary>
-        /// Convert a Matrix to a Ciphertext.
-        /// Rows in the matrix are laid next to each other in a Plaintext and then encrypted.
+        /// Convert a Matrix to a Plaintext. Rows in the matrix are laid next to each
+        /// other in a Plaintext.
         /// </summary>
-        /// <param name="matrix">Matrix to convert to Ciphertext</param>
-        /// <param name="encryptor">Encryptor used to encrypt Plaintext data</param>
+        /// <param name="matrix">Matrix to convert to Plaintext</param>
         /// <param name="encoder">BatchEncoder used to encode the matrix data</param>
         /// <returns>Encrypted matrix</returns>
-        public static Ciphertext MatrixToCiphertext(int[,] matrix, Encryptor encryptor, BatchEncoder encoder)
+        public static Plaintext MatrixToPlaintext(int[,] matrix, BatchEncoder encoder)
         {
             int batchRowSize = (int)encoder.SlotCount / 2;
             int rows = matrix.GetLength(dimension: 0);
@@ -64,21 +63,18 @@ namespace SEALAzureFuncClient
             Plaintext plain = new Plaintext();
             encoder.Encode(batchArray, plain);
 
-            Ciphertext result = new Ciphertext();
-            encryptor.Encrypt(plain, result);
-            return result;
+            return plain;
         }
 
         /// <summary>
-        /// Convert a Matrix to a twisted Ciphertext.
-        /// Rows in the matrix are laid next to each other in a Plaintext and then encrypted.
-        /// The second batching row is duplicate of the first one but rotated by eltSeparation
+        /// Convert a Matrix to a twisted Plaintext. Rows in the matrix are laid next to
+        /// each other in a Plaintext. The second batching row is duplicate of the first
+        /// one but rotated by eltSeparation
         /// </summary>
-        /// <param name="matrix">Matrix to convert to Ciphertext</param>
-        /// <param name="encryptor">Encryptor used to encrypt Plaintext data</param>
+        /// <param name="matrix">Matrix to convert to Plaintext</param>
         /// <param name="encoder">BatchEncoder used to encode the matrix data</param>
         /// <returns>Encrypted matrix</returns>
-        public static Ciphertext MatrixToTwistedCiphertext(int[,] matrix, Encryptor encryptor, BatchEncoder encoder)
+        public static Plaintext MatrixToTwistedPlaintext(int[,] matrix, BatchEncoder encoder)
         {
             int batchRowSize = (int)encoder.SlotCount / 2;
             int rows = matrix.GetLength(dimension: 0);
@@ -99,9 +95,7 @@ namespace SEALAzureFuncClient
             Plaintext plain = new Plaintext();
             encoder.Encode(batchArray, plain);
 
-            Ciphertext result = new Ciphertext();
-            encryptor.Encrypt(plain, result);
-            return result;
+            return plain;
         }
 
         /// <summary>
@@ -133,15 +127,14 @@ namespace SEALAzureFuncClient
         }
 
         /// <summary>
-        /// Set the indicated Matrix row as the coefficients of a Plaintext and encrypt it.
+        /// Set the indicated Matrix row as the coefficients of a Plaintext.
         /// </summary>
         /// <param name="matrix">Matrix to get a row from</param>
         /// <param name="row">Row to encrypt</param>
         /// <param name="repl">How many times to replicate the row values</param>
-        /// <param name="encryptor">Encryptor used to encrypt row data</param>
         /// <param name="encoder">BatchEncoder used to encode the matrix data</param>
         /// <returns>Encrypted matrix row</returns>
-        public static Ciphertext RowToCiphertext(int[,] matrix, int row, int repl, Encryptor encryptor, BatchEncoder encoder)
+        public static Plaintext RowToPlaintext(int[,] matrix, int row, int repl, BatchEncoder encoder)
         {
             int batchRowSize = (int)encoder.SlotCount / 2;
             int cols = matrix.GetLength(dimension: 1);
@@ -165,21 +158,18 @@ namespace SEALAzureFuncClient
             Plaintext plain = new Plaintext();
             encoder.Encode(rowToEncrypt, plain);
 
-            Ciphertext result = new Ciphertext();
-            encryptor.Encrypt(plain, result);
-            return result;
+            return plain;
         }
 
         /// <summary>
-        /// Set the indicated Matrix rows as the coefficients of Plaintexts and encrypt them.
-        /// Two rows will always be encrypted into a single ciphertext into the two batching "rows".
+        /// Set the indicated Matrix rows as the coefficients of Plaintexts. Two rows will
+        /// always be encoded in a single Plaintext into the two batching "rows".
         /// </summary>
         /// <param name="matrix">Matrix to get a row from</param>
         /// <param name="repl">How many times to replicate the row values</param>
-        /// <param name="encryptor">Encryptor used to encrypt row data</param>
         /// <param name="encoder">BatchEncoder used to encode the matrix data</param>
         /// <returns>Encrypted matrix rows</returns>
-        public static List<Ciphertext> RowsToCiphertexts(int[,] matrix, int repl, Encryptor encryptor, BatchEncoder encoder)
+        public static List<Plaintext> RowsToPlaintexts(int[,] matrix, int repl, BatchEncoder encoder)
         {
             int batchRowCount = 2;
             int batchRowSize = (int)encoder.SlotCount / 2;
@@ -193,7 +183,7 @@ namespace SEALAzureFuncClient
                 throw new ArgumentException("repl out of bounds");
             }
 
-            List<Ciphertext> result = new List<Ciphertext>();
+            List<Plaintext> result = new List<Plaintext>();
             int r = 0;
             while (r < rows)
             {
@@ -211,25 +201,21 @@ namespace SEALAzureFuncClient
 
                 Plaintext plain = new Plaintext();
                 encoder.Encode(batchArray, plain);
-
-                Ciphertext newCipher = new Ciphertext();
-                encryptor.Encrypt(plain, newCipher);
-                result.Add(newCipher);
+                result.Add(plain);
             }
 
             return result;
         }
 
         /// <summary>
-        /// Set the indicated Matrix column as the coefficients of a Plaintext (in inverse order)
-        /// and encrypt it.
+        /// Set the indicated Matrix column as the coefficients of a Plaintext
+        /// (in inverse order).
         /// </summary>
         /// <param name="matrix">Matrix to get a column from</param>
         /// <param name="col">Column to encrypt</param>
-        /// <param name="encryptor">Encryptor used to encrypt column data</param>
         /// <param name="encoder">BatchEncoder used to encode the matrix data</param>
         /// <returns>Encrypted inverted matrix column</returns>
-        public static Ciphertext InvertedColumnToCiphertext(int[,] matrix, int col, Encryptor encryptor, BatchEncoder encoder)
+        public static Plaintext InvertedColumnToPlaintext(int[,] matrix, int col, BatchEncoder encoder)
         {
             int batchRowSize = (int)encoder.SlotCount / 2;
             int rows = matrix.GetLength(dimension: 0);
@@ -244,9 +230,7 @@ namespace SEALAzureFuncClient
             Plaintext plain = new Plaintext();
             encoder.Encode(colToEncrypt, plain);
 
-            Ciphertext result = new Ciphertext();
-            encryptor.Encrypt(plain, result);
-            return result;
+            return plain;
         }
 
         /// <summary>
@@ -276,32 +260,33 @@ namespace SEALAzureFuncClient
         }
 
         /// <summary>
-        /// Convert a Ciphertext to a Base64 string
+        /// Convert a Plaintext to a Base64-encoded Ciphertext string.
         /// </summary>
-        /// <param name="cipher">Ciphertext to convert</param>
+        /// <param name="plain">Plaintext to encrypt, save, and convert to Base64</param>
         /// <returns>Base64 string representing the Ciphertext</returns>
-        public static string CiphertextToBase64(Ciphertext cipher)
+        public static string EncryptToBase64(Plaintext plain, Encryptor encryptor)
         {
             using (MemoryStream ms = new MemoryStream())
             {
-                cipher.Save(ms);
+                encryptor.EncryptSymmetricSave(plain, ms);
                 byte[] bytes = ms.ToArray();
                 return Convert.ToBase64String(bytes);
             }
         }
 
         /// <summary>
-        /// Convert an enumeration of Ciphertexts to a Base64 string
+        /// Convert an enumeration of Plaintexts to a Base64-encoded Ciphertext string.
         /// </summary>
-        /// <param name="cipher">Ciphertexts to convert</param>
+        /// <param name="plains">Plaintexts to encrypt, save, and convert to Base64</param>
         /// <returns>Base64 string representing the Ciphertexts</returns>
-        public static string CiphertextToBase64(IEnumerable<Ciphertext> ciphers)
+        public static string EncryptToBase64(
+            IEnumerable<Plaintext> plains, Encryptor encryptor)
         {
             using (MemoryStream ms = new MemoryStream())
             {
-                foreach (Ciphertext cipher in ciphers)
+                foreach (Plaintext plain in plains)
                 {
-                    cipher.Save(ms);
+                    encryptor.EncryptSymmetricSave(plain, ms);
                 }
                 byte[] bytes = ms.ToArray();
                 return Convert.ToBase64String(bytes);
@@ -361,11 +346,12 @@ namespace SEALAzureFuncClient
         /// </summary>
         /// <param name="rlk">RelinKeys to convert</param>
         /// <returns>Base64 string representing the RelinKeys</returns>
-        public static string RelinKeysToBase64(RelinKeys rlk)
+        public static string RelinKeysToBase64(KeyGenerator keygen)
         {
             using (MemoryStream ms = new MemoryStream())
             {
-                rlk.Save(ms);
+                // Saving directly to stream; this compresses the size in half
+                keygen.RelinKeysSave(ms);
                 byte[] bytes = ms.ToArray();
                 return Convert.ToBase64String(bytes);
             }
@@ -376,11 +362,12 @@ namespace SEALAzureFuncClient
         /// </summary>
         /// <param name="galk">GaloisKeys to convert</param>
         /// <returns>Base64 string representing the GaloisKeys</returns>
-        public static string GaloisKeysToBase64(GaloisKeys galk)
+        public static string GaloisKeysToBase64(KeyGenerator keygen, List<int> rotations)
         {
             using (MemoryStream ms = new MemoryStream())
             {
-                galk.Save(ms);
+                // Saving directly to stream; this compresses the size in half
+                keygen.GaloisKeysSave(rotations, ms);
                 byte[] bytes = ms.ToArray();
                 return Convert.ToBase64String(bytes);
             }

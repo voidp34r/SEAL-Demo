@@ -18,42 +18,38 @@ namespace SEALAzureFuncClient
     public partial class MainWindow : Window
     {
         private HttpClient httpClient_ = new HttpClient();
-        private RelinKeys rlk_ = null;
-        private GaloisKeys galk_ = null;
         private Encryptor encryptor_ = null;
         private Decryptor decryptor_ = null;
         private BatchEncoder encoder_ = null;
+        private string galoisKeys_ = null;
+        private string relinKeys_ = null;
         private string sid_ = null;
+        private Task t_ = null;
 
         /// <summary>
         /// Constructor for MainWindow
         /// </summary>
         public MainWindow()
         {
+            InitializeComponent();
+
             // Initialize in background thread
-            Task.Run(() =>
+            t_ = Task.Run(() =>
             {
                 KeyGenerator keygen = new KeyGenerator(GlobalProperties.Context);
 
-                encryptor_ = new Encryptor(GlobalProperties.Context, keygen.PublicKey);
+                // We set up SEAL in symmetric-key mode by creating the Encryptor with
+                // the secret key instead of public key.
+                encryptor_ = new Encryptor(GlobalProperties.Context, keygen.SecretKey);
                 decryptor_ = new Decryptor(GlobalProperties.Context, keygen.SecretKey);
                 encoder_ = new BatchEncoder(GlobalProperties.Context);
 
-                rlk_ = keygen.RelinKeys(decompositionBitCount: GlobalProperties.RelinKeysDBC);
-
-                List<int> rotCounts = new List<int>();
-                for (int i = (int)encoder_.SlotCount / GlobalProperties.MatrixSizeMax; i < (int)encoder_.SlotCount / 2; i *= 2)
-                {
-                    rotCounts.Add(i);
-                }
-                rotCounts.Add(0);
-                galk_ = keygen.GaloisKeys(decompositionBitCount: GlobalProperties.GaloisKeysDBC, steps: rotCounts);
+                galoisKeys_ = Utilities.GaloisKeysToBase64(keygen, CreateRotations());
+                relinKeys_ = Utilities.RelinKeysToBase64(keygen);
 
                 // Choose the Session ID
                 RandomizeSID();
             });
-
-            InitializeComponent();
         }
 
         /// <summary>
@@ -66,6 +62,25 @@ namespace SEALAzureFuncClient
             Random rnd = new Random();
             rnd.NextBytes(sidBytes);
             sid_ = Convert.ToBase64String(sidBytes);
+        }
+
+        /// <summary>
+        /// Computes power-of-two step rotation step sizes in one direction only.
+        /// This is important because normally SEAL would create rotations in both
+        /// directions, which in this applications is not needed and would double
+        /// the size of the GaloisKeys.
+        /// </summary>
+        /// <returns></returns>
+        private List<int> CreateRotations()
+        {
+            // Create power-of-two rotations in one direction only
+            List<int> rotCounts = new List<int>();
+            for (int i = (int)encoder_.SlotCount / GlobalProperties.MatrixSizeMax; i < (int)encoder_.SlotCount / 2; i *= 2)
+            {
+                rotCounts.Add(i);
+            }
+            rotCounts.Add(0);
+            return rotCounts;
         }
 
         /// <summary>
@@ -150,27 +165,28 @@ namespace SEALAzureFuncClient
         /// between the client and the server.
         /// </summary>
         /// <param name="sid">Session ID</param>
-        /// <param name="key">Key to upload (RelinKeys / GaloisKeys)</param>
         /// <param name="code">Azure function key</param>
-        private async Task<bool> UploadPublicKeys(string sid, object key, string code)
+        private async Task<bool> UploadPublicKeys(
+            string sid, GlobalProperties.PublicKeyType pkType, string code)
         {
             string b64key = null;
             string keyType = null;
-            if (key is GaloisKeys galoisKeys)
+            switch (pkType)
             {
-                keyType = "GaloisKeys";
-                b64key = Utilities.GaloisKeysToBase64(galoisKeys);
-            }
-            else if (key is RelinKeys relinKeys)
-            {
-                keyType = "RelinKeys";
-                b64key = Utilities.RelinKeysToBase64(relinKeys);
-            }
-            else
-            {
-                Log($"Invalid key type: {key.GetType()}");
-                return false;
-            }
+                case GlobalProperties.PublicKeyType.GaloisKeys:
+                    keyType = "GaloisKeys";
+                    b64key = galoisKeys_;
+                    break;
+
+                case GlobalProperties.PublicKeyType.RelinKeys:
+                    keyType = "RelinKeys";
+                    b64key = relinKeys_;
+                    break;
+
+                default:
+                    Log($"Invalid key type");
+                    return false;
+            };
 
             // Upload RelinKeys for given sid 
             Uri function = GetUri("PublicKeysUpload", code);
@@ -237,10 +253,10 @@ namespace SEALAzureFuncClient
 
             MatrixData mda = MatrixA.Matrix.DataContext as MatrixData;
             MatrixData mdb = MatrixB.Matrix.DataContext as MatrixData;
-            Ciphertext ciphera = Utilities.MatrixToCiphertext(Utilities.MatrixDataToMatrix(mda), encryptor_, encoder_);
-            Ciphertext cipherb = Utilities.MatrixToCiphertext(Utilities.MatrixDataToMatrix(mdb), encryptor_, encoder_);
+            Plaintext plaina = Utilities.MatrixToPlaintext(Utilities.MatrixDataToMatrix(mda), encoder_);
+            Plaintext plainb = Utilities.MatrixToPlaintext(Utilities.MatrixDataToMatrix(mdb), encoder_);
 
-            Plaintext plain = await PerformOperation(sid, operation, code, ciphera, cipherb);
+            Plaintext plain = await PerformOperation(sid, operation, code, plaina, plainb);
             if (null == plain)
             {
                 OperationResult.MatrixTitle = $"Error executing {operation}";
@@ -259,8 +275,8 @@ namespace SEALAzureFuncClient
         /// <summary>
         /// Perform a Matrix multiplication.
         /// 
-        /// Please refer to the file MATRIXMULTIPLICATION.md for an explanation of how matrix multiplication
-        /// is implemented in this application.
+        /// Please refer to the file MATRIXMULTIPLICATION.md for an explanation of
+        /// how matrix multiplication is implemented in this application.
         /// </summary>
         private async Task PerformMatrixMultiplication(string sid, string code)
         {
@@ -271,7 +287,9 @@ namespace SEALAzureFuncClient
             if (!await QueryPublicKeys(sid, "RelinKeys", GlobalProperties.Codes.PublicKeysQuery))
             {
                 // Upload RelinKeys if needed
-                if (!await UploadPublicKeys(sid, rlk_, GlobalProperties.Codes.PublicKeysUpload))
+                if (!await UploadPublicKeys(
+                    sid, GlobalProperties.PublicKeyType.RelinKeys,
+                    GlobalProperties.Codes.PublicKeysUpload))
                 {
                     Log($"RelinKeys upload failed");
                     return;
@@ -282,7 +300,9 @@ namespace SEALAzureFuncClient
             if (!await QueryPublicKeys(sid, "GaloisKeys", GlobalProperties.Codes.PublicKeysQuery))
             {
                 // Upload GaloisKeys if needed
-                if (!await UploadPublicKeys(sid, galk_, GlobalProperties.Codes.PublicKeysUpload))
+                if (!await UploadPublicKeys(
+                    sid, GlobalProperties.PublicKeyType.GaloisKeys,
+                    GlobalProperties.Codes.PublicKeysUpload))
                 {
                     Log($"GaloisKeys upload failed");
                     return;
@@ -334,10 +354,10 @@ namespace SEALAzureFuncClient
                 }
             }
 
-            // Make cyclicDiagsMatrix into a List of ciphertexts
-            List<Ciphertext> cdmCiphers = Utilities.RowsToCiphertexts(cyclicDiagsMatrix, mbcols, encryptor_, encoder_);
+            // Make cyclicDiagsMatrix into a List of plaintexts
+            List<Plaintext> cdmPlains = Utilities.RowsToPlaintexts(cyclicDiagsMatrix, mbcols, encoder_);
 
-            // Make matrixb into row-major ciphertext
+            // Make matrixb into row-major set of plaintexts
             int[,] paddedMatrixb = new int[dimension, mbcols];
             for (int r = 0; r < mbrows; r++)
             {
@@ -346,9 +366,9 @@ namespace SEALAzureFuncClient
                     paddedMatrixb[r, c] = matrixb[r, c];
                 }
             }
-            Ciphertext matrixbCipher = Utilities.MatrixToTwistedCiphertext(paddedMatrixb, encryptor_, encoder_);
+            Plaintext matrixbPlain = Utilities.MatrixToTwistedPlaintext(paddedMatrixb, encoder_);
 
-            Plaintext plainResult = await PerformMatrixProductOperation(sid, code, cdmCiphers, matrixbCipher);
+            Plaintext plainResult = await PerformMatrixProductOperation(sid, code, cdmPlains, matrixbPlain);
             if (null == plainResult)
             {
                 OperationResult.MatrixTitle = "Error performing matrix product";
@@ -388,10 +408,10 @@ namespace SEALAzureFuncClient
         /// <param name="ciphera">Ciphertext containing a codified matrix</param>
         /// <param name="cipherb">Ciphertext containing a second codified matrix</param>
         /// <returns>Plaintext with the result of the operation</returns>
-        private async Task<Plaintext> PerformOperation(string sid, string operation, string code, Ciphertext ciphera, Ciphertext cipherb)
+        private async Task<Plaintext> PerformOperation(string sid, string operation, string code, Plaintext plaina, Plaintext plainb)
         {
-            string b64a = Utilities.CiphertextToBase64(ciphera);
-            string b64b = Utilities.CiphertextToBase64(cipherb);
+            string b64a = Utilities.EncryptToBase64(plaina, encryptor_);
+            string b64b = Utilities.EncryptToBase64(plainb, encryptor_);
             string json = $"{{ \"sid\": \"{sid}\", \"matrixa\": \"{b64a}\", \"matrixb\": \"{b64b}\" }}";
 
             double kbs = (b64a.Length + b64b.Length) / 1024.0;
@@ -426,8 +446,8 @@ namespace SEALAzureFuncClient
 
             Ciphertext result = Utilities.Base64ToCiphertext(resultb64, GlobalProperties.Context);
             Plaintext plain = new Plaintext();
+            Log("Noise budget: " + decryptor_.InvariantNoiseBudget(result) + " bits");
             decryptor_.Decrypt(result, plain);
-            Log($"Noise budget: {decryptor_.InvariantNoiseBudget(result)} bits");
 
             return plain;
         }
@@ -440,10 +460,10 @@ namespace SEALAzureFuncClient
         /// <param name="matrixa">Ciphertext enumeration containing a codified first matrix</param>
         /// <param name="matrixb">Ciphertext containing a codified second matrix</param>
         /// <returns>Plaintext with the result of the operation</returns>
-        private async Task<Plaintext> PerformMatrixProductOperation(string sid, string code, IEnumerable<Ciphertext> matrixa, Ciphertext matrixb)
+        private async Task<Plaintext> PerformMatrixProductOperation(string sid, string code, IEnumerable<Plaintext> matrixa, Plaintext matrixb)
         {
-            string b64matrixa = Utilities.CiphertextToBase64(matrixa);
-            string b64matrixb = Utilities.CiphertextToBase64(matrixb);
+            string b64matrixa = Utilities.EncryptToBase64(matrixa, encryptor_);
+            string b64matrixb = Utilities.EncryptToBase64(matrixb, encryptor_);
             string json = $"{{ \"sid\": \"{sid}\", \"matrixa\": \"{b64matrixa}\", \"matrixb\": \"{b64matrixb}\" }}";
 
             double kbs = (b64matrixa.Length + b64matrixb.Length) / 1024.0;
@@ -478,8 +498,8 @@ namespace SEALAzureFuncClient
 
             Ciphertext resultCipher = Utilities.Base64ToCiphertext(resultb64, GlobalProperties.Context);
             Plaintext result = new Plaintext();
+            Log("Noise budget: " + decryptor_.InvariantNoiseBudget(resultCipher) + " bits");
             decryptor_.Decrypt(resultCipher, result);
-            Log($"Noise budget: {decryptor_.InvariantNoiseBudget(resultCipher)} bits");
 
             return result;
         }

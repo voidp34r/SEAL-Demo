@@ -24,6 +24,12 @@ namespace SEALAzureFuncClient
             public static readonly string PublicKeysDelete = "";
         }
 
+        internal enum PublicKeyType
+        {
+            GaloisKeys,
+            RelinKeys
+        };
+
         /// <summary>
         /// Maximum size a matrix can have
         /// </summary>
@@ -43,16 +49,6 @@ namespace SEALAzureFuncClient
         /// </summary>
         public static readonly ulong PlainModulus = (1ul << 13) * 119 + 1;
 
-        /// <summary>
-        /// The decomposition bit count to be used with RelinKeys
-        /// </summary>
-        public static readonly int RelinKeysDBC = DefaultParams.DBCmax;
-
-        /// <summary>
-        /// The decomposition bit count to be used with GaloisKeys
-        /// </summary>
-        public static readonly int GaloisKeysDBC = DefaultParams.DBCmax / 2;
-
         private static SEALContext context_ = null;
 
         /// <summary>
@@ -67,10 +63,10 @@ namespace SEALAzureFuncClient
                     EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
                     {
                         PolyModulusDegree = PolyModulusDegree,
-                        CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: PolyModulusDegree),
+                        CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree: PolyModulusDegree),
                         PlainModulus = new SmallModulus(GlobalProperties.PlainModulus)
                     };
-                    context_ = SEALContext.Create(parms);
+                    context_ = new SEALContext(parms);
                 }
 
                 return context_;

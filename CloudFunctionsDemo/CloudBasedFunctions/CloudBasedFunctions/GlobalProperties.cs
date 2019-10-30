@@ -39,10 +39,10 @@ namespace Microsoft.Research.SEALDemo
                     EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
                     {
                         PolyModulusDegree = PolyModulusDegree,
-                        CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: PolyModulusDegree),
-                        PlainModulus = new SmallModulus(GlobalProperties.PlainModulus)
+                        CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree: PolyModulusDegree),
+                        PlainModulus = new SmallModulus(PlainModulus)
                     };
-                    context_ = SEALContext.Create(parms);
+                    context_ = new SEALContext(parms);
                 }
 
                 return context_;
